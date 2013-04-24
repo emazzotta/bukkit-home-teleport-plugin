@@ -1,0 +1,13 @@
+name: BukHome
+version: 0.1.0
+authors: [Emanuele Mazzotta, Patrick Baechli]
+description: This simple Bukkit Plugin allows the users to set a home, invite other players to their home and to go to homes of others.
+
+main: org.crumbleworks.mcdonnough.minecraft.bukkit.plugin.home.BukHome
+database: false
+depend: [SQLibrary]
+
+commands:
+ home:
+  description: Set home, invite players to home, go to home of others
+  usage: /home [help | set <homename> | goto <homename> | invite <player> <homename>]
