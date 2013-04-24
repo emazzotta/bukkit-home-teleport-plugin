@@ -10,4 +10,4 @@ depend: [SQLibrary]
 commands:
  home:
   description: Set home, invite players to home, go to home of others
-  usage: /home [help | set <homename> | goto <homename> | invite <player> <homename>]
+  usage: /home [help | set <homename> | goto <homename> | invite <player>]
