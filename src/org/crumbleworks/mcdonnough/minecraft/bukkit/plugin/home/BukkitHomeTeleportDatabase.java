@@ -8,17 +8,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-public final class BukHomeDatabase {
+public final class BukkitHomeTeleportDatabase {
 
-    private static BukHomeDatabase bukHomeDatabaseInstance = new BukHomeDatabase();
+    private static BukkitHomeTeleportDatabase bukkitHomeTeleportDatabaseInstance = new BukkitHomeTeleportDatabase();
     private static JavaPlugin javaPlugin;
     private static Database sqlite;
 
-    private BukHomeDatabase() {}
+    private BukkitHomeTeleportDatabase() {}
 
-    public static BukHomeDatabase getInstance(JavaPlugin javaPlugin) {
-        BukHomeDatabase.javaPlugin = javaPlugin;
-        return bukHomeDatabaseInstance;
+    public static BukkitHomeTeleportDatabase getInstance(JavaPlugin javaPlugin) {
+        BukkitHomeTeleportDatabase.javaPlugin = javaPlugin;
+        return bukkitHomeTeleportDatabaseInstance;
     }
 
     public void close() {
@@ -26,7 +26,7 @@ public final class BukHomeDatabase {
     }
 
     public void connect() {
-        sqlite = new SQLite(Logger.getLogger("Minecraft"), "[BukHome]", javaPlugin.getDataFolder().getAbsolutePath(), "BukHome", ".sqlite");
+        sqlite = new SQLite(Logger.getLogger("Minecraft"), "[BukkitHomeTeleport]", javaPlugin.getDataFolder().getAbsolutePath(), "BukkitHomeTeleport", ".sqlite");
         sqlite.open();
     }
 
@@ -34,6 +34,8 @@ public final class BukHomeDatabase {
         try {
             return sqlite.query(query);
         } catch (SQLException e) {
+            javaPlugin.getLogger().warning("Query could not be performed");
+            javaPlugin.getLogger().warning("Query was: \n" + query);
             e.printStackTrace();
             return null;
         }

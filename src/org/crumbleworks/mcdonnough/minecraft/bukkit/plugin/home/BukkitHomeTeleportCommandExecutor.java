@@ -1,5 +1,6 @@
 package org.crumbleworks.mcdonnough.minecraft.bukkit.plugin.home;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,15 +10,15 @@ import org.bukkit.entity.Player;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class BukHomeCommandExecutor implements CommandExecutor {
+public class BukkitHomeTeleportCommandExecutor implements CommandExecutor {
 
     public static final int NEEDED_INVITE_COMMAND_PARAMETERS = 3;
-    private BukHome bukHome;
-    private BukHomeDatabase bukHomeDatabase;
+    private BukkitHomeTeleport bukkitHomeTeleport;
+    private BukkitHomeTeleportDatabase bukkitHomeTeleportDatabase;
 
-	public BukHomeCommandExecutor(BukHome bukHome) {
-		this.bukHome = bukHome;
-        this.bukHomeDatabase = BukHomeDatabase.getInstance(bukHome);
+	public BukkitHomeTeleportCommandExecutor(BukkitHomeTeleport bukkitHomeTeleport) {
+		this.bukkitHomeTeleport = bukkitHomeTeleport;
+        this.bukkitHomeTeleportDatabase = BukkitHomeTeleportDatabase.getInstance(bukkitHomeTeleport);
 	}
 	
 	@Override
@@ -40,7 +41,7 @@ public class BukHomeCommandExecutor implements CommandExecutor {
                         executeInviteCommand(player, args);
                         break;
                     default:
-                        player.sendMessage(Constants.INVALID_PARAMETER);
+                        player.sendMessage(ChatColor.RED + "Invalid parameter");
                 }
             } else {
                 executeHelpCommand(player);
@@ -48,25 +49,25 @@ public class BukHomeCommandExecutor implements CommandExecutor {
 			
 			return true;
 		} else {
-			sender.sendMessage(Constants.MUST_BE_INVOKED_BY_A_PLAYER);
+			sender.sendMessage("Must be invoked by a player");
 			return false;
 		}
 	}
 
     private void executeHelpCommand(Player player) {
-        player.sendMessage("help about le home");
+        player.sendMessage("usage: /home [help | set <homename> | goto <homename> | goto <player> | invite <player>]\n");
     }
 
     private void executeSetCommand(Player player, String[] args) {
 		String homeName = getHomeName(args, 1);
 
         performSetNewHomeInsert(player, homeName);
-        bukHome.getLogger().info("set home named '" + homeName + "' for player '" + player.getName() + "'");
+        bukkitHomeTeleport.getLogger().info("set home named '" + homeName + "' for player '" + player.getName() + "'");
         player.sendMessage("set home named '" + homeName + "'");
 	}
 
     private void performSetNewHomeInsert(Player player, String homeName) {
-        bukHomeDatabase.performQuery("INSERT OR REPLACE INTO home(playername, homename, x, y, z) VALUES('" + player.getName() + "', '" + homeName + "', "+ player.getLocation().getX() +", "+ player.getLocation().getY() +", "+ player.getLocation().getZ() +");");
+        bukkitHomeTeleportDatabase.performQuery("INSERT OR REPLACE INTO home(playername, homename, x, y, z) VALUES('" + player.getName() + "', '" + homeName + "', "+ player.getLocation().getX() +", "+ player.getLocation().getY() +", "+ player.getLocation().getZ() +");");
     }
 
     private void executeGotoCommand(Player player, String[] args) {
@@ -77,21 +78,21 @@ public class BukHomeCommandExecutor implements CommandExecutor {
         float z = 0f;
 
         try {
-            ResultSet resultSet = bukHomeDatabase.performQuery("SELECT x, y, z FROM home WHERE playername = '" + player.getName() + "' AND homename = '" + homeName + "'");
-			bukHome.getLogger().info("Selected home named '" + homeName + "' for player '" + player.getName() + "'");
+            ResultSet resultSet = bukkitHomeTeleportDatabase.performQuery("SELECT x, y, z FROM home WHERE playername = '" + player.getName() + "' AND homename = '" + homeName + "'");
+			bukkitHomeTeleport.getLogger().info("Selected home named '" + homeName + "' for player '" + player.getName() + "'");
 			
 			while(resultSet.next()) {
 				x = resultSet.getFloat("x");
 				y = resultSet.getFloat("y");
 				z = resultSet.getFloat("z");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        player.teleport(new Location(player.getWorld(), x, y, z));
-		bukHome.getLogger().info("Ported player '" + player.getName() + "' to home named '" + homeName + "'");
-		player.sendMessage("Ported to home named '" + homeName + "'");
+            player.teleport(new Location(player.getWorld(), x, y, z));
+            bukkitHomeTeleport.getLogger().info("Ported player '" + player.getName() + "' to home named '" + homeName + "'");
+            player.sendMessage("Ported to home named '" + homeName + "'");
+        } catch (SQLException e) {
+            player.sendMessage(ChatColor.RED + "Error teleporting, home " + homeName + " might not exist");
+        }
 	}
 
     // TODO
@@ -106,11 +107,11 @@ public class BukHomeCommandExecutor implements CommandExecutor {
 			inviteeName = args[1];
 		}
 		
-        bukHomeDatabase.performQuery("INSERT OR REPLACE INTO invitee(playername) VALUES('" + player.getName() + "');");
-        bukHome.getLogger().info("added invitee named '" + player.getName() + "'");
+        bukkitHomeTeleportDatabase.performQuery("INSERT OR REPLACE INTO invitee(playername) VALUES('" + player.getName() + "');");
+        bukkitHomeTeleport.getLogger().info("added invitee named '" + player.getName() + "'");
 
-        bukHomeDatabase.performQuery("INSERT INTO home_invitee(playername) VALUES('" + player.getName() + "');");
-        bukHome.getLogger().info("added invitee named '" + player.getName() + "'");
+        bukkitHomeTeleportDatabase.performQuery("INSERT INTO home_invitee(playername) VALUES('" + player.getName() + "');");
+        bukkitHomeTeleport.getLogger().info("added invitee named '" + player.getName() + "'");
 	}
 	
 	private String getHomeName(String[] args, int position) {
