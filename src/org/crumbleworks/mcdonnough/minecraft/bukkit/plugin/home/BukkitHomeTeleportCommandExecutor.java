@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 public class BukkitHomeTeleportCommandExecutor implements CommandExecutor {
 
-    public static final int NEEDED_INVITE_COMMAND_PARAMETERS = 3;
+    public static final int NEEDED_INVITE_COMMAND_PARAMETERS = 2;
     private BukkitHomeTeleport bukkitHomeTeleport;
     private BukkitHomeTeleportDatabase bukkitHomeTeleportDatabase;
 
@@ -55,7 +55,7 @@ public class BukkitHomeTeleportCommandExecutor implements CommandExecutor {
 	}
 
     private void executeHelpCommand(Player player) {
-        player.sendMessage("usage: /home [help | set <homename> | goto <homename> | goto <player> | invite <player>]\n");
+        player.sendMessage(ChatColor.YELLOW + "Usage: /home [help | set <homename> | goto <homename> | goto <player> | invite <player>]\n");
     }
 
     private void executeSetCommand(Player player, String[] args) {
@@ -97,16 +97,13 @@ public class BukkitHomeTeleportCommandExecutor implements CommandExecutor {
 
     // TODO
 	private void executeInviteCommand(Player player, String[] args) {
-		String homeName = getHomeName(args, 2);
-		String inviteeName = null;
-
 		if(args.length < NEEDED_INVITE_COMMAND_PARAMETERS) {
-			player.sendMessage("Usage: /home inivte <player>");
+			player.sendMessage(ChatColor.YELLOW + "Usage: /home inivte <player>");
 			return;
-		} else {
-			inviteeName = args[1];
-		}
-		
+        }
+
+        String inviteeName = args[1];
+
         bukkitHomeTeleportDatabase.performQuery("INSERT OR REPLACE INTO invitee(playername) VALUES('" + player.getName() + "');");
         bukkitHomeTeleport.getLogger().info("added invitee named '" + player.getName() + "'");
 
